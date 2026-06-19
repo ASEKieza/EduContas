@@ -2,19 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   EduContas ERP — Design Tokens v1.1
+   ============================================================ */
+:root {
+  /* Marca (teal-petróleo) */
+  --brand-50:#E8F3F4;  --brand-100:#C5E2E5; --brand-200:#93C8CE;
+  --brand-300:#5BA8B2; --brand-400:#2E8794; --brand-500:#136B79;
+  --brand-600:#0E5560; --brand-700:#0C434C; --brand-800:#0B363E;
+  --brand-900:#0A2C33;
+  /* Tinta estrutural */
+  --ink:#0D2730;
+  /* Acento (ouro sóbrio) */
+  --accent-300:#F3CD72; --accent-400:#E8B339; --accent-500:#C9941A; --accent-600:#9E7212;
+  /* Neutros (slate frio) */
+  --slate-50:#F7F9FA;  --slate-100:#EEF2F4; --slate-200:#E1E8EB;
+  --slate-300:#CBD6DB; --slate-400:#94A6AE; --slate-500:#637680;
+  --slate-600:#485961; --slate-700:#33424A; --slate-800:#1E2B31;
+  --slate-900:#11191D;
+  /* Semânticas */
+  --success:#16A34A; --success-bg:#E7F6ED; --success-fg:#0F7A37;
+  --danger:#DC2626;  --danger-bg:#FBEAEA;  --danger-fg:#B11C1C;
+  --warning:#D97706; --warning-bg:#FCF1E1; --warning-fg:#9A5808;
+  --info:#2563EB;    --info-bg:#E8EFFD;    --info-fg:#1D4FCB;
+  /* Tipografia */
+  --font-display:"Sora","Inter",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  /* Espaçamento (base 4px) */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:32px; --space-10:40px;
+  --space-12:48px; --space-16:64px;
+  /* Raio */
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:20px; --radius-full:9999px;
+  /* Sombras */
+  --shadow-sm:0 1px 2px rgba(17,25,29,.06), 0 1px 1px rgba(17,25,29,.04);
+  --shadow-md:0 4px 12px rgba(17,25,29,.08), 0 2px 4px rgba(17,25,29,.05);
+  --shadow-lg:0 12px 28px rgba(17,25,29,.12), 0 6px 10px rgba(17,25,29,.06);
+  --shadow-xl:0 24px 50px rgba(17,25,29,.18);
+  /* Aliases de tema (claro) */
+  --bg:#F2F6F7;
+  --surface:#FFFFFF;
+  --surface-2:#F7F9FA;
+  --surface-3:#EEF2F4;
+  --border:#E1E8EB;
+  --border-strong:#CBD6DB;
+  --text:#11191D;
+  --text-muted:#637680;
+  --text-faint:#94A6AE;
+  --primary:var(--brand-600);
+  --primary-hover:var(--brand-700);
+  --primary-soft:var(--brand-50);
+  --ring:rgba(14,85,96,.35);
+  --heading:var(--ink);
+  /* Layout */
+  --sidebar-width: 268px;
+}
+
 @layer base {
-  :root {
-    --sidebar-width: 268px;
-  }
+  :root {}
 
   * { box-sizing: border-box; }
 
   body {
     @apply text-ink-900 antialiased;
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: var(--font-body);
     background: transparent;
+    font-feature-settings: "tnum" 1, "cv11" 1;
   }
 
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--heading);
+  }
   h1 { @apply text-2xl font-bold tracking-tight; }
   h2 { @apply text-xl font-semibold tracking-tight; }
   h3 { @apply text-[15px] font-semibold; }
