@@ -582,7 +582,7 @@ function NotasDF({ ano }: { ano: string }) {
 }
 
 // ── RELATÓRIO DE GESTÃO TAB ────────────────────────────────────────────────────
-function RelatorioGestao({ ano }: { ano: string }) {
+function RelatorioGestao({ ano, modoDemo = true }: { ano: string; modoDemo?: boolean }) {
   const [open, setOpen]   = useState<Set<string>>(new Set(["actividade"]));
   const [texts, setTexts] = useState<Record<string, string>>({});
   const toggle = (id: string) => setOpen(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
@@ -652,13 +652,19 @@ function RelatorioGestao({ ano }: { ano: string }) {
   return (
     <div className="space-y-4">
       {/* Company identity card */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4">
+      <div className={`bg-white border rounded-xl p-4 flex items-center gap-4 ${modoDemo ? "border-amber-200" : "border-blue-200"}`}>
         <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shrink-0"
           style={{ backgroundColor:"#1a2744" }}>
           ASE
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-gray-900">{DEMO_COMPANY.nome}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-gray-900">{DEMO_COMPANY.nome}</p>
+            {modoDemo
+              ? <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-600 border border-red-200">Demo</span>
+              : <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-200">Dados Reais</span>
+            }
+          </div>
           <p className="text-xs text-gray-500">{DEMO_COMPANY.nifFormatado} · {DEMO_COMPANY.sede}</p>
           <p className="text-xs text-gray-400">{DEMO_COMPANY.cae} · Fundação: {DEMO_COMPANY.fundacao}</p>
         </div>
@@ -1484,11 +1490,46 @@ function RelatorioPrintAll({ ano, show = false }: { ano: string; show?: boolean 
   );
 }
 
+// ── DATA MODE TOGGLE ──────────────────────────────────────────────────────────
+function DataModeToggle({ modoDemo, onChange }: { modoDemo: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center gap-0.5 p-0.5 bg-gray-100 border border-gray-200 rounded-lg">
+      <button
+        onClick={() => onChange(false)}
+        className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-medium transition-all ${
+          !modoDemo
+            ? "bg-white shadow-sm text-gray-900 border border-gray-200"
+            : "text-gray-500 hover:text-gray-700"
+        }`}
+      >
+        <svg className={`w-4 h-4 ${!modoDemo ? "text-blue-600" : "text-gray-400"}`} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 3h18v2H3V3zm2 4h14v2H5V7zm-2 4h18v2H3v-2zm2 4h14v2H5v-2zm-2 4h18v2H3v-2z" />
+          <rect x="3" y="10" width="4" height="8" rx="1" />
+          <rect x="10" y="7" width="4" height="11" rx="1" />
+          <rect x="17" y="4" width="4" height="14" rx="1" />
+        </svg>
+        Dados Reais
+      </button>
+      <button
+        onClick={() => onChange(true)}
+        className={`px-3 py-1 rounded-md text-sm font-semibold transition-all ${
+          modoDemo
+            ? "bg-red-50 text-red-600 border border-red-200"
+            : "text-gray-500 hover:text-gray-700"
+        }`}
+      >
+        Demo
+      </button>
+    </div>
+  );
+}
+
 // ── MAIN PAGE ──────────────────────────────────────────────────────────────────
 export default function RelatorioTecnicoPage() {
   const [tab, setTab]         = useState<Tab>("gestao");
   const [ano, setAno]         = useState("2025");
   const [preview, setPreview] = useState(false);
+  const [modoDemo, setModoDemo] = useState(true);
 
   const LEGAL_BADGES = [
     { label:"PGCA Angola",        color:"bg-blue-50 text-blue-700 border-blue-200" },
@@ -1514,10 +1555,11 @@ export default function RelatorioTecnicoPage() {
             </div>
             <div>
               <p className="text-white text-sm font-semibold">Pré-visualização — Relatório Completo {ano}</p>
-              <p className="text-white/60 text-xs">Dados demonstrativos · PGCA Angola — Decreto n.º 82/01</p>
+              <p className="text-white/60 text-xs">{modoDemo ? "Dados demonstrativos" : "Dados reais"} · PGCA Angola — Decreto n.º 82/01</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <DataModeToggle modoDemo={modoDemo} onChange={setModoDemo} />
             <select value={ano} onChange={e => setAno(e.target.value)}
               className="px-3 py-1.5 text-sm border border-white/20 rounded-lg bg-white/10 text-white focus:outline-none">
               {ANOS.map(a => <option key={a} value={a} style={{ color:"#000" }}>{a}</option>)}
@@ -1566,6 +1608,7 @@ export default function RelatorioTecnicoPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <DataModeToggle modoDemo={modoDemo} onChange={setModoDemo} />
           <select value={ano} onChange={e => setAno(e.target.value)}
             className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
             {ANOS.map(a => <option key={a} value={a}>{a}</option>)}
@@ -1611,9 +1654,35 @@ export default function RelatorioTecnicoPage() {
         ))}
       </div>
 
+      {/* ── Mode banner ────────────────────────────────────────────────── */}
+      {!modoDemo && (
+        <div className="no-print flex items-start gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50">
+          <svg className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p className="text-sm font-semibold text-blue-800">Modo Dados Reais activo</p>
+            <p className="text-xs text-blue-700 mt-0.5">
+              Os valores serão alimentados automaticamente pelos lançamentos registados no módulo de Contabilidade.
+              Adicione lançamentos em <strong>Contabilidade → Diário</strong> para que o relatório reflicta os dados reais da empresa.
+            </p>
+          </div>
+        </div>
+      )}
+      {modoDemo && (
+        <div className="no-print flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-200 bg-amber-50">
+          <svg className="w-4 h-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M5.07 19H19a2 2 0 001.75-2.96l-7-12a2 2 0 00-3.5 0l-7 12A2 2 0 005.07 19z" />
+          </svg>
+          <p className="text-xs text-amber-800">
+            <strong>Modo Demo</strong> — dados demonstrativos de <strong>ASE Grupo Lda.</strong> Mude para <em>Dados Reais</em> para usar os lançamentos da sua empresa.
+          </p>
+        </div>
+      )}
+
       {/* ── Tab Content ────────────────────────────────────────────────── */}
       <div className="no-print">
-        {tab === "gestao"        && <RelatorioGestao ano={ano} />}
+        {tab === "gestao"        && <RelatorioGestao ano={ano} modoDemo={modoDemo} />}
         {tab === "demonstracoes" && <DemonstracoesFin ano={ano} />}
         {tab === "notas"         && <NotasDF ano={ano} />}
         {tab === "parecer"       && <ParecerCLC ano={ano} />}
