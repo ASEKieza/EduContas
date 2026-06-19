@@ -1530,6 +1530,18 @@ export default function RelatorioTecnicoPage() {
   const [ano, setAno]         = useState("2025");
   const [preview, setPreview] = useState(false);
   const [modoDemo, setModoDemo] = useState(true);
+  const [printing, setPrinting] = useState(false);
+
+  const handlePrint = useCallback(async () => {
+    setPrinting(true);
+    // Two animation frames ensure React commits + browser lays out the full report
+    await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+    await new Promise<void>(r => setTimeout(r, 150));
+    window.print();
+    // Keep visible briefly so AfterPrint event fires, then reset
+    await new Promise<void>(r => setTimeout(r, 800));
+    setPrinting(false);
+  }, []);
 
   const LEGAL_BADGES = [
     { label:"PGCA Angola",        color:"bg-blue-50 text-blue-700 border-blue-200" },
@@ -1572,6 +1584,7 @@ export default function RelatorioTecnicoPage() {
               </svg>
               Imprimir / Exportar PDF
             </button>
+            {/* Preview already has show={true}, so direct window.print() is fine here */}
             <button onClick={() => setPreview(false)}
               className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white/80 border border-white/20 rounded-lg hover:bg-white/10 transition-colors">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1621,13 +1634,25 @@ export default function RelatorioTecnicoPage() {
             </svg>
             Pré-visualizar
           </button>
-          <button onClick={() => window.print()}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-90 transition-opacity shadow-sm"
+          <button onClick={handlePrint} disabled={printing}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-90 transition-opacity shadow-sm disabled:opacity-60"
             style={{ backgroundColor:"#1a2744" }}>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Exportar Relatório Completo
+            {printing ? (
+              <>
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                </svg>
+                A preparar...
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Exportar Relatório Completo
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -1690,8 +1715,8 @@ export default function RelatorioTecnicoPage() {
         {tab === "mapas"         && <MapasFiscais ano={ano} />}
       </div>
 
-      {/* ── Print-only comprehensive report ─────────────────────────────── */}
-      <RelatorioPrintAll ano={ano} />
+      {/* ── Print-only comprehensive report (pre-rendered when printing=true) ── */}
+      <RelatorioPrintAll ano={ano} show={printing} />
     </div>
   );
 }

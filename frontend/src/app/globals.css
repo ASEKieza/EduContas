@@ -171,6 +171,21 @@
     color-adjust: exact !important;
   }
 
+  /* ── Fix layout overflow that clips print content ── */
+  /* The app shell has h-screen + overflow-hidden which truncates to viewport height */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+  .h-screen          { height: auto !important; }
+  .overflow-hidden   { overflow: visible !important; }
+  .overflow-y-auto   { overflow: visible !important; height: auto !important; }
+  .flex-1            { flex: 0 0 auto !important; }
+  main               { overflow: visible !important; height: auto !important; display: block !important; }
+  /* flex containers must become block so children stack vertically for print */
+  .h-screen.flex     { display: block !important; }
+
   /* hide navigation chrome + screen-only UI */
   aside,
   header,
@@ -184,18 +199,20 @@
 
   /* remove outer page padding & gaps */
   .p-6 { padding: 0 !important; }
-  .space-y-4 > * + * { margin-top: 0 !important; }
+  .space-y-6 > * + *, .space-y-4 > * + * { margin-top: 0 !important; }
 
   /* remove card shadows and rounded corners */
   .shadow-sm, .shadow-card { box-shadow: none !important; }
   .rounded-xl, .rounded-t-none, .rounded-b-xl, .rounded-t-xl { border-radius: 0 !important; }
 
-  /* page breaks */
-  tr { page-break-inside: avoid; }
+  /* page breaks — use modern + legacy for browser compat */
+  tr { page-break-inside: avoid; break-inside: avoid; }
   thead { display: table-header-group; }
-  .print-break-before { page-break-before: always; }
+  .print-break-before { page-break-before: always; break-before: page; }
+  .print-page-card    { page-break-before: always; break-before: page; }
+  .print-page-card:first-child { page-break-before: auto; break-before: auto; }
 
-  /* in print mode: show print-only as plain blocks without paper styling */
+  /* in print mode: strip paper card styling */
   .print-page-card { box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; }
 }
 
