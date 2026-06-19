@@ -1,0 +1,209 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sidebar-width: 268px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    @apply text-ink-900 antialiased;
+    font-family: "Inter", system-ui, sans-serif;
+    background: transparent;
+  }
+
+  h1 { @apply text-2xl font-bold tracking-tight; }
+  h2 { @apply text-xl font-semibold tracking-tight; }
+  h3 { @apply text-[15px] font-semibold; }
+}
+
+@layer components {
+  /* ── Buttons ─────────────────────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2
+      bg-brand-600 text-white text-sm font-semibold rounded-lg
+      hover:bg-brand-700 active:bg-brand-800
+      shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2
+      bg-white text-ink-700 text-sm font-medium rounded-lg
+      border border-ink-200 hover:bg-ink-50 hover:border-ink-300
+      active:bg-ink-100 transition-all;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-2
+      text-ink-600 text-sm font-medium rounded-lg
+      hover:bg-ink-100 hover:text-ink-900 transition-colors;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center gap-2 px-4 py-2
+      bg-gold-400 text-ink-950 text-sm font-semibold rounded-lg
+      hover:bg-gold-500 active:bg-gold-600
+      shadow-sm transition-all;
+  }
+
+  .btn-aqua {
+    @apply inline-flex items-center gap-2 px-4 py-2
+      bg-aqua-500 text-white text-sm font-semibold rounded-lg
+      hover:bg-aqua-600 active:bg-aqua-700
+      shadow-sm transition-all;
+  }
+
+  /* ── Cards ───────────────────────────────────────────────── */
+  .card {
+    @apply bg-white rounded-xl border border-ink-200 shadow-card;
+  }
+
+  .card-dark {
+    @apply bg-ink-900 rounded-xl border border-ink-800;
+  }
+
+  .card-gold {
+    @apply bg-gold-50 rounded-xl border border-gold-200;
+  }
+
+  .card-aqua {
+    @apply bg-aqua-50 rounded-xl border border-aqua-200;
+  }
+
+  .card-red {
+    @apply bg-brand-50 rounded-xl border border-brand-200;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-ink-100;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  /* ── Inputs ──────────────────────────────────────────────── */
+  .input {
+    @apply w-full px-3 py-2 text-sm border border-ink-200 rounded-lg
+      bg-white placeholder-ink-400 text-ink-900
+      focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent
+      transition;
+  }
+
+  .label {
+    @apply block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5;
+  }
+
+  /* ── Badges ──────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .badge-green  { @apply badge bg-green-100  text-green-800; }
+  .badge-red    { @apply badge bg-brand-100  text-brand-800; }
+  .badge-blue   { @apply badge bg-blue-100   text-blue-800; }
+  .badge-yellow { @apply badge bg-gold-100   text-gold-800; }
+  .badge-gray   { @apply badge bg-ink-100    text-ink-600; }
+  .badge-gold   { @apply badge bg-gold-400   text-ink-950; }
+  .badge-aqua   { @apply badge bg-aqua-100   text-aqua-800; }
+  .badge-ink    { @apply badge bg-ink-900    text-white; }
+  .badge-warn   { @apply badge bg-amber-100  text-amber-800; }
+  .badge-purple { @apply badge bg-purple-100 text-purple-800; }
+
+  /* ── Table ───────────────────────────────────────────────── */
+  .table-auto th {
+    @apply px-4 py-3 text-left text-[11px] font-bold text-ink-400
+      uppercase tracking-widest bg-ink-50 border-b border-ink-100;
+  }
+  .table-auto td {
+    @apply px-4 py-3 text-sm text-ink-700 border-t border-ink-100;
+  }
+  .table-auto tr:hover td {
+    @apply bg-ink-50/60;
+  }
+
+  /* ── Stat bar (progress) ─────────────────────────────────── */
+  .stat-bar {
+    @apply h-1.5 rounded-full bg-ink-100 overflow-hidden;
+  }
+  .stat-bar-fill {
+    @apply h-full rounded-full transition-all duration-700;
+  }
+
+  /* ── Upload drop zone ────────────────────────────────────── */
+  .drop-zone {
+    @apply border-2 border-dashed border-ink-300 rounded-xl
+      flex flex-col items-center justify-center gap-3 p-10
+      bg-ink-50 hover:border-brand-500 hover:bg-brand-50
+      cursor-pointer transition-colors;
+  }
+  .drop-zone-active {
+    @apply border-brand-500 bg-brand-50;
+  }
+
+  /* ── Step indicator ──────────────────────────────────────── */
+  .step-dot {
+    @apply w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0;
+  }
+  .step-dot-done   { @apply bg-green-100 text-green-700; }
+  .step-dot-active { @apply bg-brand-600 text-white animate-pulse; }
+  .step-dot-idle   { @apply bg-ink-100 text-ink-400; }
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 5px; height: 5px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { @apply bg-ink-200 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-ink-300; }
+
+/* ── Print ───────────────────────────────────────────────── */
+@media print {
+  /* A4 portrait, tight margins */
+  @page { size: A4 portrait; margin: 10mm 14mm; }
+
+  /* ★ Force exact reproduction of ALL colors, backgrounds and borders */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* hide navigation chrome + screen-only UI */
+  aside,
+  header,
+  .no-print { display: none !important; }
+
+  /* show print-only comprehensive report */
+  .print-only { display: block !important; }
+
+  /* remove sidebar offset */
+  [style*="margin-left"] { margin-left: 0 !important; }
+
+  /* remove outer page padding & gaps */
+  .p-6 { padding: 0 !important; }
+  .space-y-4 > * + * { margin-top: 0 !important; }
+
+  /* remove card shadows and rounded corners */
+  .shadow-sm, .shadow-card { box-shadow: none !important; }
+  .rounded-xl, .rounded-t-none, .rounded-b-xl, .rounded-t-xl { border-radius: 0 !important; }
+
+  /* page breaks */
+  tr { page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  .print-break-before { page-break-before: always; }
+
+  /* in print mode: show print-only as plain blocks without paper styling */
+  .print-page-card { box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; }
+}
+
+/* Screen preview: paper card look */
+.print-page-card {
+  background: white;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  border-radius: 4px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
