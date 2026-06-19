@@ -9,6 +9,8 @@ import {
 } from "@/lib/accounting/engine";
 import { DATASETS, ANOS_DISPONIVEIS } from "@/lib/accounting/sampleData";
 import { DEMO_COMPANY } from "@/lib/company";
+import { NOTAS, CAT_LABELS, CAT_COLORS, useNotasTextos } from "@/lib/notas-shared";
+import type { NotaCat } from "@/lib/notas-shared";
 import type { FSRow } from "@/lib/accounting/types";
 
 // ── AI suggest hook ────────────────────────────────────────────────────────────
@@ -395,188 +397,171 @@ function DemonstracoesFin({ ano }: { ano: string }) {
   );
 }
 
-// ── NOTAS ÀS DEMONSTRAÇÕES FINANCEIRAS ────────────────────────────────────────
-const NOTAS_DF = [
-  {
-    num: "1", titulo: "Identificação da Entidade e Actividade",
-    auto: (ano: string, ds: ReturnType<typeof calcApuramento>) =>
-      `${DEMO_COMPANY.nome} é uma ${DEMO_COMPANY.tipoSociedade.toLowerCase()}, constituída ao abrigo da ${DEMO_COMPANY.lgsc} (Lei Geral das Sociedades Comerciais), com sede em ${DEMO_COMPANY.sede}. A empresa exerce a sua actividade no sector de ${DEMO_COMPANY.objectoSocial.split(" ")[0].toLowerCase()} — ${DEMO_COMPANY.cae}. As presentes demonstrações financeiras referem-se ao exercício económico findo em 31 de Dezembro de ${ano} e foram elaboradas em conformidade com o ${DEMO_COMPANY.pgca}.`,
-  },
-  {
-    num: "2", titulo: "Bases de Preparação das Demonstrações Financeiras",
-    auto: () =>
-      `As demonstrações financeiras foram preparadas em conformidade com o Plano Geral de Contabilidade de Angola (PGCA), aprovado pelo Decreto n.º 82/01 de 26 de Outubro, tendo como pressuposto a continuidade das operações. A moeda de apresentação é o Kwanza Angolano (AOA). Os valores estão expressos em AOA, excepto onde expressamente indicado.`,
-  },
-  {
-    num: "3", titulo: "Principais Políticas Contabilísticas",
-    auto: () =>
-      `3.1 Imobilizações corpóreas: são registadas ao custo de aquisição, deduzido das amortizações acumuladas. As amortizações são calculadas pelo método das quotas constantes.\n3.2 Existências: são valorizadas ao custo de aquisição ou custo de produção pelo método FIFO (primeiro a entrar, primeiro a sair).\n3.3 Clientes e outros devedores: são reconhecidos pelo valor nominal, líquidos de perdas por imparidade estimadas.\n3.4 Reconhecimento de proveitos: os proveitos de vendas são reconhecidos quando os riscos e vantagens significativos da propriedade são transferidos para o comprador.`,
-  },
-  {
-    num: "4", titulo: "Imobilizações Corpóreas e Incorpóreas",
-    auto: (_ano: string, ds: ReturnType<typeof calcApuramento>, raw: any) => {
-      const imob = (raw?.cor ?? 0) + (raw?.inco ?? 0);
-      return `As imobilizações corpóreas e incorpóreas encontram-se registadas pelo respetivo custo histórico de aquisição, deduzido das amortizações acumuladas e perdas por imparidade. O valor líquido contabilístico totaliza AOA ${imob.toLocaleString("pt-PT")} em 31 de Dezembro.`;
-    },
-  },
-  {
-    num: "5", titulo: "Existências",
-    auto: (_ano: string, _ds: any, raw: any) =>
-      `As existências são valorizadas pelo custo médio ponderado ou FIFO, conforme a natureza do artigo. As perdas por imparidade sobre existências obsoletas ou de rotação lenta são estimadas e registadas em provisões. O saldo de existências em 31 de Dezembro totaliza AOA ${(raw?.exist ?? 0).toLocaleString("pt-PT")}.`,
-  },
-  {
-    num: "6", titulo: "Clientes e Outros Devedores",
-    auto: (_ano: string, _ds: any, raw: any) =>
-      `O saldo de clientes e outros devedores inclui créditos sobre clientes nacionais e internacionais, líquidos de provisões para créditos de cobrança duvidosa. O valor de clientes em 31 de Dezembro totaliza AOA ${(raw?.clientes ?? 0).toLocaleString("pt-PT")}.`,
-  },
-  {
-    num: "7", titulo: "Disponibilidades",
-    auto: (_ano: string, _ds: any, raw: any) =>
-      `As disponibilidades incluem o saldo de caixa e depósitos bancários à ordem. O saldo em 31 de Dezembro totaliza AOA ${(raw?.disp ?? 0).toLocaleString("pt-PT")}. Não existem restrições materialmente relevantes sobre a utilização dos saldos de caixa e depósitos.`,
-  },
-  {
-    num: "8", titulo: "Capital Próprio",
-    auto: (_ano: string, ds: ReturnType<typeof calcApuramento>, raw: any) =>
-      `O capital social da empresa encontra-se integralmente realizado. O resultado líquido do exercício foi de AOA ${ds.rle.toLocaleString("pt-PT")}. O total do capital próprio em 31 de Dezembro totaliza AOA ${(raw?.cp ?? 0).toLocaleString("pt-PT")}.`,
-  },
-  {
-    num: "9", titulo: "Financiamentos Obtidos",
-    auto: (_ano: string, _ds: any, raw: any) =>
-      `Os financiamentos obtidos incluem empréstimos bancários de médio e longo prazo. O saldo em 31 de Dezembro totaliza AOA ${(raw?.divida ?? 0).toLocaleString("pt-PT")}. As condições de remuneração são indexadas à taxa de referência do Banco Nacional de Angola (BNA).`,
-  },
-  {
-    num: "10", titulo: "Fornecedores e Outros Credores",
-    auto: (_ano: string, _ds: any, raw: any) =>
-      `O saldo de fornecedores e outros credores representa obrigações de curto prazo decorrentes de compras de bens e serviços. O valor de fornecedores em 31 de Dezembro totaliza AOA ${(raw?.forn ?? 0).toLocaleString("pt-PT")}.`,
-  },
-  {
-    num: "11", titulo: "Impostos e Contribuições — Situação Fiscal",
-    auto: (_ano: string, ds: ReturnType<typeof calcApuramento>) =>
-      `O Imposto Industrial foi calculado sobre o lucro tributável à taxa de 30% (taxa geral). Os pagamentos por conta são efectuados em Abril (70%) e Agosto (30%) do exercício seguinte. O INSS é calculado sobre as remunerações brutas à taxa patronal de 8% e à taxa do trabalhador de 3%. O IVA é apurado mensalmente.\n\nSituação fiscal: A empresa considera-se em dia com as suas obrigações fiscais perante a Administração Geral Tributária (AGT).`,
-  },
-  {
-    num: "12", titulo: "Garantias e Compromissos",
-    auto: () =>
-      `Em 31 de Dezembro não existem garantias prestadas a terceiros, avales ou compromissos fora do balanço com impacto material nas demonstrações financeiras, excepto os decorrentes do normal curso do negócio.`,
-  },
-  {
-    num: "13", titulo: "Factos Ocorridos Após a Data do Balanço",
-    auto: (ano: string) =>
-      `Entre a data do balanço (31 de Dezembro de ${ano}) e a data de aprovação das demonstrações financeiras não ocorreram factos relevantes que requeiram ajustamento ou divulgação adicional nas presentes demonstrações financeiras.`,
-  },
-  {
-    num: "14", titulo: "Partes Relacionadas",
-    auto: () =>
-      `As transacções com partes relacionadas são efectuadas em condições de mercado (arm's length). Não existem operações materialmente relevantes com partes relacionadas que devam ser divulgadas separadamente.`,
-  },
-];
-
+// ── NOTAS ÀS DEMONSTRAÇÕES FINANCEIRAS ───────────────────────────────────────
+// Uses the 49-note PGCA system from @/lib/notas-shared, reading text saved
+// in the Notas às DF page via the shared localStorage key.
 function NotasDF({ ano }: { ano: string }) {
-  const ds   = DATASETS[ano] ?? DATASETS["2025"];
-  const c    = useMemo(() => calcApuramento(ds.cur), [ds]);
+  const { textos, setTexto } = useNotasTextos(ano);
+  const [openNote, setOpenNote] = useState<Set<string>>(new Set());
+  const [catFilter, setCatFilter] = useState<NotaCat | "all">("all");
+  const [search, setSearch] = useState("");
 
-  const existencias    = Math.max(0, sum(ds.cur,"31","32","33","34","35","36") - sum(ds.cur,"28.3","28.4","28.5"));
-  const clientes       = sum(ds.cur,"21");
-  const disponibilidades = sum(ds.cur,"11","12","13","14");
-  const imobCor        = sum(ds.cur,"43","44") - sum(ds.cur,"48.3","48.4","48.5","48.6");
-  const imobInco       = sum(ds.cur,"42") - sum(ds.cur,"48.2");
-  const totalCP        = sum(ds.cur,"51") + sum(ds.cur,"52","55","56") + sum(ds.cur,"57","59") + c.rle;
-  const divida         = sum(ds.cur,"23.1") + sum(ds.cur,"23.2");
-  const fornecedores   = sum(ds.cur,"22");
-
-  const raw = { exist: existencias, clientes, disp: disponibilidades, cor: imobCor, inco: imobInco, cp: totalCP, divida, forn: fornecedores };
-  const [openNote, setOpenNote] = useState<Set<string>>(new Set(["1","2","3"]));
-  const [extras, setExtras]     = useState<Record<string, string>>({});
   const toggle = (id: string) => setOpenNote(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
-  const aiDados: Record<string, unknown> = {
-    "Empresa": DEMO_COMPANY.nome, "NIF": DEMO_COMPANY.nif, "Sector": DEMO_COMPANY.cae,
-    "Capital Social (AOA)": DEMO_COMPANY.capitalSocial.toLocaleString("pt-PT"),
-    "Resultado Líquido (AOA)": c.rle.toLocaleString("pt-PT"),
-    "Imobilizações Corpóreas Líq. (AOA)": imobCor.toLocaleString("pt-PT"),
-    "Imobilizações Incorpóreas Líq. (AOA)": imobInco.toLocaleString("pt-PT"),
-    "Existências (AOA)": existencias.toLocaleString("pt-PT"),
-    "Clientes (AOA)": clientes.toLocaleString("pt-PT"),
-    "Disponibilidades (AOA)": disponibilidades.toLocaleString("pt-PT"),
-    "Capital Próprio (AOA)": totalCP.toLocaleString("pt-PT"),
-    "Dívida Financeira (AOA)": divida.toLocaleString("pt-PT"),
-    "Fornecedores (AOA)": fornecedores.toLocaleString("pt-PT"),
-    "Bancos": DEMO_COMPANY.bancos,
-  };
+  const filled = NOTAS.filter(n => (textos[n.num] ?? "").trim().length > 0);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return NOTAS.filter(n =>
+      (catFilter === "all" || n.cat === catFilter) &&
+      (q === "" || n.titulo.toLowerCase().includes(q) || n.num.includes(q))
+    );
+  }, [search, catFilter]);
 
   return (
     <div className="space-y-3">
       {/* Header */}
       <div className="bg-white border border-gray-200 rounded-xl p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <p className="text-sm font-bold text-gray-900">Notas às Demonstrações Financeiras</p>
             <p className="text-xs text-gray-500 mt-0.5">
-              {DEMO_COMPANY.nome} · Exercício findo em 31 de Dezembro de {ano} · {DEMO_COMPANY.pgca}
+              {DEMO_COMPANY.nome} · Exercício findo em 31 de Dezembro de {ano} · PGCA Angola — 49 notas oficiais
             </p>
           </div>
-          <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-            {NOTAS_DF.length} notas
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${
+              filled.length === 49 ? "bg-green-50 text-green-700 border-green-200" : "bg-amber-50 text-amber-700 border-amber-200"
+            }`}>
+              {filled.length}/49 preenchidas
+            </span>
+            <a href="/notas"
+              className="text-xs text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              Editar notas completas →
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* AI hint */}
-      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 border border-purple-200">
-        <svg className="w-4 h-4 text-purple-600 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L9.1 9.1 2 12l7.1 2.9L12 22l2.9-7.1L22 12l-7.1-2.9z" />
-        </svg>
-        <p className="text-xs text-purple-700">
-          Cada nota tem um botão <strong>"Sugerir com IA"</strong> que gera texto explicativo conforme o PGCA Angola,
-          com referência às normas da AGT, BNA, OCPCA e Lei n.º 22/11.
-        </p>
+      {/* Progress banner */}
+      {filled.length < 49 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-3">
+          <svg className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-amber-800">
+              {49 - filled.length} nota{49 - filled.length !== 1 ? "s" : ""} ainda não preenchida{49 - filled.length !== 1 ? "s" : ""}
+            </p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Aceda a <strong>Notas às DF</strong> no menu lateral para preencher todas as 49 notas PGCA.
+              O texto guardado aparecerá automaticamente aqui.
+            </p>
+            <div className="mt-2 h-1.5 bg-amber-200 rounded-full overflow-hidden">
+              <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${(filled.length / 49) * 100}%` }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Search + Category filter */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="relative flex-1 min-w-40">
+          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Pesquisar nota..."
+            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+          />
+        </div>
+        {(["all","politicas","ativo","cp","dr","dfc","outras"] as const).map(cat => {
+          const c = cat === "all" ? null : CAT_COLORS[cat];
+          return (
+            <button key={cat} onClick={() => setCatFilter(cat)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                catFilter === cat
+                  ? cat === "all" ? "bg-gray-800 text-white border-gray-800" : `${c!.bg} ${c!.text} ${c!.border}`
+                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+              }`}>
+              {cat === "all" ? `Todas (49)` : CAT_LABELS[cat as NotaCat]}
+            </button>
+          );
+        })}
       </div>
 
-      {NOTAS_DF.map(nota => {
+      {/* Note list */}
+      {filtered.map(nota => {
         const isOpen = openNote.has(nota.num);
-        const textoAuto = nota.auto(ano, c, raw);
+        const texto = textos[nota.num] ?? "";
+        const hasTxt = texto.trim().length > 0;
+        const c = CAT_COLORS[nota.cat];
         return (
-          <div key={nota.num} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div key={nota.num} className={`border rounded-xl overflow-hidden transition-all ${isOpen ? `border-2 ${c.border}` : "border-gray-200 bg-white"}`}>
             <button onClick={() => toggle(nota.num)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors">
-              <span className="flex-shrink-0 w-7 h-7 rounded-full text-white text-xs font-bold flex items-center justify-center"
-                style={{ backgroundColor:"#1a2744" }}>
-                {nota.num}
-              </span>
-              <span className="text-sm font-semibold text-gray-800 flex-1">{nota.titulo}</span>
-              <svg className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? "rotate-180" : ""}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${isOpen ? c.bg : "bg-white hover:bg-gray-50"}`}>
+              <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+                hasTxt ? `${c.bg} ${c.text} border-2 ${c.border}` : "bg-gray-100 text-gray-500"
+              }`}>{nota.num}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`font-semibold text-sm ${isOpen ? c.text : "text-gray-800"}`}>{nota.titulo}</span>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${c.bg} ${c.text} ${c.border}`}>
+                    {CAT_LABELS[nota.cat]}
+                  </span>
+                  {hasTxt
+                    ? <span className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">✓ Com texto</span>
+                    : !isOpen && <span className="text-[10px] text-gray-400 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded-full">Não preenchida</span>
+                  }
+                </div>
+                {!isOpen && <p className="text-xs text-gray-400 mt-0.5 truncate">{nota.desc}</p>}
+              </div>
+              <svg className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? `rotate-180 ${c.text}` : "text-gray-400"}`}
                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
             {isOpen && (
-              <div className="px-4 pb-4 border-t border-gray-100 space-y-3">
-                {/* Auto text */}
-                <div className="mt-2 p-3 rounded-lg bg-gray-50 border border-gray-100">
-                  <p className="text-[10px] font-bold uppercase text-gray-400 tracking-wider mb-1">Texto gerado automaticamente</p>
-                  <p className="text-[11px] text-gray-700 leading-relaxed whitespace-pre-line">{textoAuto}</p>
+              <div className="px-4 pb-4 pt-2 bg-white border-t border-gray-100 space-y-3">
+                <p className="text-xs text-gray-500 leading-relaxed">{nota.desc}</p>
+                {nota.contas && (
+                  <p className="text-[10px] text-gray-400 font-mono">Contas PGCA: {nota.contas}</p>
+                )}
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Notas Explicativas</span>
+                    {hasTxt && (
+                      <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">✓ Guardado</span>
+                    )}
+                  </div>
+                  <textarea
+                    value={texto}
+                    onChange={e => setTexto(nota.num, e.target.value)}
+                    placeholder={`Inserir notas e explicações relativas à Nota ${nota.num}…`}
+                    className="w-full min-h-[80px] px-3 py-2.5 text-xs border border-indigo-100 rounded-lg resize-y
+                      focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300
+                      text-gray-700 bg-white leading-relaxed placeholder-gray-300"
+                  />
+                  <p className="text-[10px] text-gray-400">
+                    Guardado automaticamente · Partilhado com a página <strong>Notas às DF</strong>
+                  </p>
                 </div>
-                {/* Extra textarea */}
-                <textarea
-                  value={extras[nota.num] ?? ""}
-                  onChange={e => setExtras(p => ({ ...p, [nota.num]: e.target.value }))}
-                  placeholder="Complementar ou substituir com texto personalizado..."
-                  className="w-full h-20 px-3 py-2 text-xs border border-gray-200 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-purple-400 text-gray-700"
-                />
-                {/* AI button */}
-                <AiSuggestionCard
-                  id={`nota-${nota.num}`}
-                  tipo="nota"
-                  seccao={`${nota.num}: ${nota.titulo}`}
-                  dados={aiDados}
-                  ano={ano}
-                  onApply={t => setExtras(p => ({ ...p, [nota.num]: t }))}
-                />
               </div>
             )}
           </div>
         );
       })}
+
+      {filtered.length === 0 && (
+        <div className="text-center py-10 text-gray-400">
+          <p className="text-sm font-medium">Nenhuma nota encontrada</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -1129,6 +1114,7 @@ function RelatorioPrintAll({ ano, show = false }: { ano: string; show?: boolean 
   const cur = ds.cur;
   const pri = ds.pri;
   const c   = useMemo(() => calcApuramento(cur), [cur]);
+  const { textos: notasTextos } = useNotasTextos(ano);
 
   const balanco    = useMemo(() => buildBalanco(cur, pri), [cur, pri]);
   const drNat      = useMemo(() => buildDRNatureza(cur, pri), [cur, pri]);
@@ -1379,43 +1365,43 @@ function RelatorioPrintAll({ ano, show = false }: { ano: string; show?: boolean 
         </div>
       ))}
 
-      {/* ── PARTE IV: NOTAS ── */}
-      <div className="print-page-card bg-white px-8 py-4" style={{ pageBreakBefore:"always" }}>
-        <PrintSection title="Notas às Demonstrações Financeiras" part="Parte IV" />
-        <p style={{ fontSize:10, color:"#6b7280", marginBottom:20 }}>
-          Exercício findo em 31 de Dezembro de {ano} · PGCA Angola — Decreto n.º 82/01
-        </p>
-        <div style={{ columns:2, columnGap:32 }}>
-          {NOTAS_DF.slice(0, 7).map(nota => (
-            <div key={nota.num} style={{ breakInside:"avoid", marginBottom:16 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                <div style={{ width:22, height:22, borderRadius:"50%", backgroundColor:"#1a2744", display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                  <span style={{ color:"white", fontSize:9, fontWeight:700 }}>{nota.num}</span>
-                </div>
-                <p style={{ fontSize:10, fontWeight:700, color:"#1a2744" }}>{nota.titulo}</p>
-              </div>
-              <p style={{ fontSize:9, color:"#4b5563", lineHeight:1.6, whiteSpace:"pre-line" }}>{nota.auto(ano, c, raw)}</p>
+      {/* ── PARTE IV: NOTAS (49 PGCA) — 5 pages, 10 notes per page ── */}
+      {[0,1,2,3,4].map(pageIdx => {
+        const slice = NOTAS.slice(pageIdx * 10, pageIdx * 10 + 10);
+        if (slice.length === 0) return null;
+        return (
+          <div key={pageIdx} className="print-page-card bg-white px-8 py-4" style={{ pageBreakBefore:"always" }}>
+            <PrintSection
+              title={pageIdx === 0 ? "Notas às Demonstrações Financeiras" : "Notas às Demonstrações Financeiras (cont.)"}
+              part="Parte IV"
+            />
+            {pageIdx === 0 && (
+              <p style={{ fontSize:10, color:"#6b7280", marginBottom:20 }}>
+                Exercício findo em 31 de Dezembro de {ano} · PGCA Angola — Decreto n.º 82/01 · 49 Notas
+              </p>
+            )}
+            <div style={{ columns:2, columnGap:32 }}>
+              {slice.map(nota => {
+                const texto = (notasTextos[nota.num] ?? "").trim();
+                return (
+                  <div key={nota.num} style={{ breakInside:"avoid", marginBottom:16 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                      <div style={{ width:22, height:22, borderRadius:"50%", backgroundColor:"#1a2744", display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                        <span style={{ color:"white", fontSize:9, fontWeight:700 }}>{nota.num}</span>
+                      </div>
+                      <p style={{ fontSize:10, fontWeight:700, color:"#1a2744" }}>{nota.titulo}</p>
+                    </div>
+                    {texto
+                      ? <p style={{ fontSize:9, color:"#374151", lineHeight:1.6, whiteSpace:"pre-line" }}>{texto}</p>
+                      : <p style={{ fontSize:9, color:"#9ca3af", fontStyle:"italic" }}>{nota.desc}</p>
+                    }
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="print-page-card bg-white px-8 py-4" style={{ pageBreakBefore:"always" }}>
-        <PrintSection title="Notas às Demonstrações Financeiras (cont.)" part="Parte IV" />
-        <div style={{ columns:2, columnGap:32 }}>
-          {NOTAS_DF.slice(7).map(nota => (
-            <div key={nota.num} style={{ breakInside:"avoid", marginBottom:16 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                <div style={{ width:22, height:22, borderRadius:"50%", backgroundColor:"#1a2744", display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                  <span style={{ color:"white", fontSize:9, fontWeight:700 }}>{nota.num}</span>
-                </div>
-                <p style={{ fontSize:10, fontWeight:700, color:"#1a2744" }}>{nota.titulo}</p>
-              </div>
-              <p style={{ fontSize:9, color:"#4b5563", lineHeight:1.6, whiteSpace:"pre-line" }}>{nota.auto(ano, c, raw)}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        );
+      })}
 
       {/* ── PARTE V: PARECER ── */}
       <div className="print-page-card bg-white px-8 py-8" style={{ pageBreakBefore:"always" }}>
